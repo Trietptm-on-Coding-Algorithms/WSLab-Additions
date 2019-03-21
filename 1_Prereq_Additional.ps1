@@ -106,12 +106,37 @@ function  Get-WindowsBuildNumber {
         }catch{
             WriteError "`t Failed to download SysinternalsSuite!"
         }
-        # Unnzipping and extracting just diskspd.exe x64
+        # Unnzipping and extracting
             Expand-Archive "$PSScriptRoot\Temp\ToolsVHD\SysinternalsSuite\SysinternalsSuite.zip" -DestinationPath "$PSScriptRoot\Temp\ToolsVHD\SysinternalsSuite\Unzip"
             Copy-Item -Path (Get-ChildItem -Path "$PSScriptRoot\Temp\ToolsVHD\SysinternalsSuite\Unzip" -Recurse).fullname -Destination "$PSScriptRoot\Temp\ToolsVHD\SysinternalsSuite\"
             Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\SysinternalsSuite\SysinternalsSuite.zip"
             Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\SysinternalsSuite\Unzip" -Recurse -Force
     }
+
+# Downloading Kansa if its not in ToolsVHD folder
+    WriteInfoHighlighted "Testing Kansa presence"
+    If ( Test-Path -Path "$PSScriptRoot\Temp\ToolsVHD\Kansa\Kansa.ps1" ) {
+        WriteSuccess "`t Kansa is present, skipping download"
+    }else{ 
+        WriteInfo "`t Kansa not there - Downloading Kansa"
+        New-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Kansa" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+        try {
+            $downloadurl = 'https://github.com/davehull/Kansa/archive/master.zip'
+            Invoke-WebRequest -Uri $downloadurl -OutFile "$PSScriptRoot\Temp\ToolsVHD\Kansa\Kansa-master.zip"
+        }catch{
+            WriteError "`t Failed to download Kansa!"
+        }
+        # Unnzipping and extracting
+            Expand-Archive "$PSScriptRoot\Temp\ToolsVHD\Kansa\Kansa-master.zip" -DestinationPath "$PSScriptRoot\Temp\ToolsVHD\Kansa\Unzip"
+            Copy-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Kansa\Unzip\Kansa-master\*" -Recurse  -Destination "$PSScriptRoot\Temp\ToolsVHD\Kansa\" -Force
+            Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Kansa\Kansa-master.zip"
+            Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Kansa\Unzip" -Recurse -Force
+            Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Kansa" -Recurse -Include "*.md" -Force
+            Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Kansa\.gitignore" -Recurse -Force
+    }
+
+
+    
 #endregion
 
 # finishing 
