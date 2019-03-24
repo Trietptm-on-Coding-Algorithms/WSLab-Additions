@@ -66,6 +66,15 @@ function  Get-WindowsBuildNumber {
 
 #endregion
 
+#region folder build
+# Checking Folder Structure
+    "Temp\ToolsVHD\SCCM","Temp\ToolsVHD\SCCMPrereqs" | ForEach-Object {
+        if (!( Test-Path "$PSScriptRoot\$_" )) { New-Item -Type Directory -Path "$PSScriptRoot\$_" } }
+
+    "Temp\ToolsVHD\SCCM\Copy_SCCM_install_here.txt","Temp\ToolsVHD\SCCMPrereqs\Copy_SCCMPrereqs_here.txt" | ForEach-Object {
+        if (!( Test-Path "$PSScriptRoot\$_" )) { New-Item -Type File -Path "$PSScriptRoot\$_" } }
+#endregion folder build
+
 #region Download Scripts
 
 <#region TODO
