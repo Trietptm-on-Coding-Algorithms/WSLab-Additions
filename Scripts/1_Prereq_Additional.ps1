@@ -1,4 +1,4 @@
-# Verify Running as Admin
+﻿# Verify Running as Admin
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 If (!( $isAdmin )) {
     Write-Host "-- Restarting as Administrator" -ForegroundColor Cyan ; Start-Sleep -Seconds 1
@@ -68,7 +68,7 @@ function  Get-WindowsBuildNumber {
 
 #region folder build
 # Checking Folder Structure
-    "Temp\ToolsVHD\SCCM","Temp\ToolsVHD\SCCMPrereqs" | ForEach-Object {
+    "Temp\ToolsVHD\Scripts","Temp\ToolsVHD\SCCM","Temp\ToolsVHD\SCCMPrereqs" | ForEach-Object {
         if (!( Test-Path "$PSScriptRoot\$_" )) { New-Item -Type Directory -Path "$PSScriptRoot\$_" } }
 
     "Temp\ToolsVHD\SCCM\Copy_SCCM_install_here.txt","Temp\ToolsVHD\SCCMPrereqs\Copy_SCCMPrereqs_here.txt" | ForEach-Object {
@@ -76,28 +76,22 @@ function  Get-WindowsBuildNumber {
 #endregion folder build
 
 #region Download Scripts
-
-<#region TODO
-#add scripts for SCCM?
-    $Filenames="1_SQL_Install","2_ADK_Install","3_SCVMM_Install"
-    foreach ($Filename in $filenames){
-        $Path="$PSScriptRoot\Temp\ToolsVHD\SCVMM\$Filename.ps1"
-        If (Test-Path -Path $Path){
-            WriteSuccess "`t $Filename is present, skipping download"
+$Filenames="Install-TAFirst2008R2DomainController","Set-StaticIPAddressUsingWMI"
+foreach ($Filename in $filenames){
+    $Path="$PSScriptRoot\Temp\ToolsVHD\Scripts\$Filename.ps1"
+    If (Test-Path -Path $Path){
+        WriteSuccess "`t $Filename is present, skipping download"
+    }else{
+        $FileContent=$null
+        $FileContent = (Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/mcpjanmarek/WSLab-Additions/master/Tools/$Filename.ps1").Content
+        if ($FileContent){
+            $script = New-Item "$PSScriptRoot\Temp\ToolsVHD\Scripts\$Filename.ps1" -type File -Force
+            Set-Content -path $script -value $FileContent
         }else{
-            $FileContent=$null
-            $FileContent = (Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/Microsoft/WSLab/master/Tools/$Filename.ps1").Content
-            if ($FileContent){
-                $script = New-Item $Path -type File -Force
-                $FileContent=$FileContent -replace "PasswordGoesHere",$LabConfig.AdminPassword #only applies to 1_SQL_Install and 3_SCVMM_Install.ps1
-                $FileContent=$FileContent -replace "DomainNameGoesHere",$LabConfig.DomainNetbiosName #only applies to 1_SQL_Install and 3_SCVMM_Install.ps1
-                Set-Content -path $script -value $FileContent
-            }else{
-                WriteErrorAndExit "Unable to download $Filename."
-            }
+            WriteErrorAndExit "Unable to download $Filename."
         }
     }
-#>
+}
 
 #endregion
 
