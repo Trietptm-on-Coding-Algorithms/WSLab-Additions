@@ -264,3 +264,9 @@ pause
 
     Dismount-VHD $vhddisk.Number
 #endregion
+
+# finishing 
+WriteInfo "Script finished at $(Get-date) and took $(((get-date) - $StartDateTime).TotalMinutes) Minutes"
+Stop-Transcript
+WriteSuccess "Press enter to continue..."
+Read-Host | Out-Null

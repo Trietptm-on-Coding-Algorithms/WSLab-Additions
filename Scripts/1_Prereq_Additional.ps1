@@ -42,7 +42,7 @@ function  Get-WindowsBuildNumber {
 
 #endregion
 
-#region Initializtion
+#region Initialization
 
 # grab Time and start Transcript
     Start-Transcript -Path "$PSScriptRoot\Prereq_Additional.log"
@@ -96,6 +96,37 @@ foreach ($Filename in $filenames){
 #endregion
 
 #region some tools to download
+# Downloading ATOM Setup Launcher if its not in ToolsVHD folder
+    WriteInfoHighlighted "Testing ATOM Setup Launcher presence"
+    If ( Test-Path -Path "$PSScriptRoot\Temp\ToolsVHD\ATOM\atom_setup_launcher.exe" ) {
+        WriteSuccess "`t ATOM Setup Launcher is present, skipping download"
+    }else{ 
+        WriteInfo "`t ATOM Setup Launcher not there - Downloading ATOM Setup Launcher"
+        New-Item -Path "$PSScriptRoot\Temp\ToolsVHD\ATOM" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+        try {
+            $downloadurl = 'https://www.atom.ms/_download/atom_setup_launcher.exe'
+            Invoke-WebRequest -Uri $downloadurl -OutFile "$PSScriptRoot\Temp\ToolsVHD\ATOM\atom_setup_launcher.exe"
+        }catch{
+            WriteError "`t Failed to download ATOM Setup Launcher!"
+        }
+    }
+
+# Downloading ATOM Demo Configuration.bin if its not in ToolsVHD folder
+    WriteInfoHighlighted "Testing ATOM Configuration.bin presence"
+    If ( Test-Path -Path "$PSScriptRoot\Temp\ToolsVHD\ATOM\configuration.bin" ) {
+        WriteSuccess "`t ATOM Configuration.bin is present, skipping download"
+    }else{ 
+        WriteInfo "`t ATOM Configuration.bin not there - Downloading Configuration.bin"
+        New-Item -Path "$PSScriptRoot\Temp\ToolsVHD\ATOM" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+        try {
+            $downloadurl = 'https://www.atom.ms/_download/configuration.bin'
+            Invoke-WebRequest -Uri $downloadurl -OutFile "$PSScriptRoot\Temp\ToolsVHD\ATOM\configuration.bin"
+        }catch{
+            WriteError "`t Failed to download ATOM Configuration.bin!"
+        }
+        '9998887776665554' | Out-File -FilePath "$PSScriptRoot\Temp\ToolsVHD\ATOM\defense-ops-atom-key.txt"
+    }
+
 # Downloading sysinternals if its not in ToolsVHD folder
     WriteInfoHighlighted "Testing SysinternalsSuite presence"
     If ( Test-Path -Path "$PSScriptRoot\Temp\ToolsVHD\SysinternalsSuite\accesschk.exe" ) {
@@ -138,7 +169,27 @@ foreach ($Filename in $filenames){
             Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Kansa\.gitignore" -Recurse -Force
     }
 
-
+# Downloading Commando-VM if its not in ToolsVHD folder
+    WriteInfoHighlighted "Testing Commando-VM presence"
+    If ( Test-Path -Path "$PSScriptRoot\Temp\ToolsVHD\Commando-VM\install.ps1" ) {
+        WriteSuccess "`t Commando-VM is present, skipping download"
+    }else{ 
+        WriteInfo "`t Commando-VM not there - Downloading Commando-VM"
+        New-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Commando-VM" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+        try {
+            $downloadurl = 'https://github.com/fireeye/commando-vm/archive/master.zip'
+            Invoke-WebRequest -Uri $downloadurl -OutFile "$PSScriptRoot\Temp\ToolsVHD\Commando-VM\Commando-VM-master.zip"
+        }catch{
+            WriteError "`t Failed to download Commando-VM!"
+        }
+        # Unnzipping and extracting
+            Expand-Archive "$PSScriptRoot\Temp\ToolsVHD\Commando-VM\Commando-VM-master.zip" -DestinationPath "$PSScriptRoot\Temp\ToolsVHD\Commando-VM\Unzip"
+            Copy-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Commando-VM\Unzip\Commando-VM-master\*" -Recurse  -Destination "$PSScriptRoot\Temp\ToolsVHD\Commando-VM\" -Force
+            Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Commando-VM\Commando-VM-master.zip" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Commando-VM\Unzip" -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Commando-VM" -Recurse -Include "*.md" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "$PSScriptRoot\Temp\ToolsVHD\Commando-VM\.gitignore" -Recurse -Force -ErrorAction SilentlyContinue
+    }
     
 #endregion
 
