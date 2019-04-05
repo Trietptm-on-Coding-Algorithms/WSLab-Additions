@@ -45,7 +45,7 @@ function  Get-WindowsBuildNumber {
 #region Initializtion
 
 # grab Time and start Transcript
-    Start-Transcript -Path "$PSScriptRoot\Prereq-Additional.log"
+    Start-Transcript -Path "$PSScriptRoot\Prereq_Additional.log"
     $StartDateTime = get-date
     WriteInfo "Script started at $StartDateTime"
 
